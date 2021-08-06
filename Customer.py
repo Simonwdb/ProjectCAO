@@ -4,7 +4,7 @@ from Subscription import Subscription
 from Settings import settings
 
 
-def get_clicks(data_df: pd.DataFrame, statement: str):
+def get_clicks(data_df: pd.DataFrame, statement: str) -> int:
     code = settings.code_id['Requests within subscription']
     amount = 0
     for c in code:
@@ -12,7 +12,7 @@ def get_clicks(data_df: pd.DataFrame, statement: str):
     return amount
 
 
-def process_monthly_df(data_df: pd.DataFrame):
+def process_monthly_df(data_df: pd.DataFrame) -> Subscription:
     date = data_df.iloc[0]['Factuur Export Datum'].date()
 
     free_requests = get_clicks(data_df, 'Nee')
@@ -29,23 +29,26 @@ def process_monthly_df(data_df: pd.DataFrame):
 
 
 class Customer:
+
     def __init__(self):
-        self.subscriptions = []
-        self.debtor_number = None
-        self.name = None
-        self.subscription_type = None
-        self.month_highest_above = None
+        self.subscriptions: list[Subscription] = []
+        self.debtor_number: int = 0
+        self.name: str = ''
+        self.subscription_type: str = ''
+        self.month_highest_above: int = 0
+        self.last_paid_month: str = ''
         self.total_costs_paid = 0
-        self.months_above = 0
-        self.avg_month_price = 0
-        self.avg_clicks = 0
-        self.median_clicks = 0
-        self.mode_clicks = 0
-        self.highest_clicks = 0
+        self.months_above: int = 0
+        self.avg_month_price: float = 0
+        self.avg_clicks: float = 0
+        self.median_clicks: int = 0
+        self.mode_clicks: int = 0
+        self.highest_clicks: int = 0
 
     def process_dataframe(self, df: pd.DataFrame):
         self.debtor_number = df.iloc[0]['Debiteur nr.']
         self.name = df.iloc[0]['Klant']
+        df = df.sort_values(by='Factuur Export Datum')
         unique_date_list = df['Factuur Export Datum'].unique()
         for u in unique_date_list:
             month_df = df[df['Factuur Export Datum'] == u]
@@ -122,6 +125,9 @@ class Customer:
                 result = s.total_clicks
         return result
 
+    def set_last_paid_month(self):
+        self.last_paid_month = self.subscriptions[-1].date.strftime('%d-%m-%Y')
+
     def perform_calculations(self):
         self.subscription_type = self.get_subscription_type()
         self.total_costs_paid = self.count_total_costs()
@@ -131,6 +137,7 @@ class Customer:
         self.median_clicks = self.count_median_clicks()
         self.mode_clicks = self.count_mode_clicks()
         self.highest_clicks = self.count_highest_clicks()
+        self.set_last_paid_month()
 
     def change_subscriptions(self, data_dict: dict):
         for s in self.subscriptions:

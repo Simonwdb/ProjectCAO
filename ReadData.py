@@ -39,8 +39,8 @@ class ReadData:
         self.df = self.df[self.df['Debiteur nr.'].notna()]
         self.columns_data_df = ['Debiteur nr.', 'Klant', 'Abonnement', 'Totaal betaald', 'Gem. Prijs',
                                 'Maanden boven bundel', 'Aantal maanden actief', 'Gem. Gebruik', 'Mediaan gebruik',
-                                'Modus gebruik', 'Hoogste gebruik', 'Subscription Object']
-        self.customers = []
+                                'Modus gebruik', 'Hoogste gebruik', 'Laatst gefactureerde datum', 'Subscription Object']
+        self.customers: list[Customer] = []
 
     def process_customers(self):
         unique_debtor_list = self.df['Debiteur nr.'].unique()
@@ -57,7 +57,7 @@ class ReadData:
             values = [
                 c.debtor_number, c.name, c.subscription_type, c.total_costs_paid, c.avg_month_price,
                 c.months_above, len(c.subscriptions), c.avg_clicks, c.median_clicks,
-                c.mode_clicks, c.highest_clicks, c.subscriptions
+                c.mode_clicks, c.highest_clicks, c.last_paid_month, c.subscriptions
             ]
             df.loc[len(df)] = values
 
@@ -74,6 +74,6 @@ class ReadData:
         return data_df
 
 
-if __name__ == '__main__':
-    path = settings.path_file
-    app = ReadData(path_file=path)
+# if __name__ == '__main__':
+#     path = settings.path_file
+#     app = ReadData(path_file=path)
